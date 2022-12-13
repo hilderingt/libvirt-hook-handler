@@ -1,0 +1,39 @@
+#!/bin/sh
+
+LIBVIRT_HOOK_ORIGIN=$(basename "${0}")
+LIBVIRT_HOOK_OBJ=${1}
+LIBVIRT_HOOK_OP=${2}
+LIBVIRT_HOOK_SUBOP=${3}
+LIBVIRT_HOOK_XARG=${4}
+LIBVIRT_HOOK_SCRIPTDIR=""
+LIBVIRT_HOOK_FUNC=""
+
+case "${LIBVIRT_HOOK_ORIGIN}" in
+	daemon)
+		LIBVIRT_HOOK_SCRIPTDIR="${LIBVIRT_HOOK_ORIGIN}.d"
+		LIBVIRT_HOOK_FUNC=${LIBVIRT_HOOK_SUBOP}
+		;;
+	qemu | lxc | libxl | network)
+		LIBVIRT_HOOK_SCRIPTDIR="${LIBVIRT_HOOK_ORIGIN}.d/\
+${LIBVIRT_HOOK_OBJ}/${LIBVIRT_HOOK_SUBOP}"
+		LIBVIRT_HOOK_FUNC=${LIBVIRT_HOOK_OP}
+		;;
+	*) 
+		exit 0
+		;;
+esac
+
+if ! [ -d "${LIBVIRT_HOOK_SCRIPTDIR}" ]
+then
+	exit 0
+fi
+
+for script in $(echo "${LIBVIRT_HOOK_SCRIPTDIR}"/*)
+do
+	unset ${LIBVIRT_HOOK_FUNC}
+
+	. ${script}
+	eval ${LIBVIRT_HOOK_FUNC}
+done
+
+exit 0
