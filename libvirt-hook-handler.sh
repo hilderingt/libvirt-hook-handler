@@ -33,7 +33,7 @@ do
 	unset ${LIBVIRT_HOOK_FUNC}
 
 	. ${script}
-	eval ${LIBVIRT_HOOK_FUNC}
+	${LIBVIRT_HOOK_FUNC}
 done
 
 exit 0
